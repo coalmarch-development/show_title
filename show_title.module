@@ -1,0 +1,150 @@
+<?php
+
+/**
+ * @file
+ * Module Show Title.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\node\Entity\NodeType;
+use Drupal\taxonomy\Entity\Term;
+use \Drupal\Core\Access\AccessResult;
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function show_title_entity_extra_field_info() {
+
+  $extra = [];
+
+  // Nodes.
+  foreach (NodeType::loadMultiple() as $bundle) {
+    $extra['node'][$bundle->id()]['display']['show_title'] = [
+      'label' => t('Title'),
+      'description' => t('Show Title'),
+      'weight' => 100,
+      'visible' => TRUE,
+    ];
+  }
+
+  // Taxonomy terms.
+  foreach (Term::loadMultiple() as $term) {
+    $extra['taxonomy_term'][$term->bundle()]['display']['show_title'] = [
+      'label' => t('Name'),
+      'description' => t('Show Name'),
+      'weight' => 100,
+      'visible' => TRUE,
+    ];
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function show_title_node_view(
+  array &$build,
+  EntityInterface $node,
+  EntityViewDisplayInterface $display,
+  $view_mode) {
+
+  if ($display->getComponent('show_title')) {
+    $build['show_title'] = [
+      '#type' => 'markup',
+      '#markup' => $node->getTitle(),
+    ];
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function show_title_taxonomy_term_view(
+  array &$build,
+  EntityInterface $taxonomy_term,
+  EntityViewDisplayInterface $display,
+  $view_mode) {
+
+  if ($display->getComponent('show_title')) {
+    $build['show_title'] = [
+      '#type' => 'markup',
+      '#markup' => $taxonomy_term->getName(),
+    ];
+  }
+}
+
+
+/**
+ * Implements hook_block_access().
+ */
+function show_title_block_access(\Drupal\block\Entity\Block $block, $operation, \Drupal\Core\Session\AccountInterface $account) {
+  if ($operation == 'view' && $block->getPluginId() == 'page_title_block') {
+    if (!show_title_block()) {
+      return AccessResult::forbidden();
+    }
+  }
+}
+
+/**
+ * Define if the block title need to show.
+ *
+ * @return bool for show block.
+ */
+function show_title_block() {
+  $show_block_title = TRUE;
+  if (\Drupal::service('path.matcher')->isFrontPage()) {
+    $show_block_title = FALSE;
+  }
+  if (show_title_is_in_display_mode()) {
+    $show_block_title = FALSE;
+  }
+  return $show_block_title;
+}
+
+/**
+ * Check if the extra field is used.
+ *
+ * @return bool Is used.
+ */
+function show_title_is_in_display_mode() {
+  $entities = [];
+  foreach (\Drupal::routeMatch()->getParameters() as $param) {
+    if ($param instanceof \Drupal\Core\Entity\EntityInterface) {
+      $entities[] = $param;
+    }
+  }
+  if (!empty($entities)) {
+    $entity = $entities[0];
+    $display = \Drupal::entityTypeManager()
+      ->getStorage('entity_view_display')
+      ->load($entity->getEntityTypeId() . '.' . $entity->bundle() . '.default');
+    if (!empty($display)) {
+      $content = $display->get("content");
+      if (!empty($content['show_title'])) {
+        return TRUE;
+      }
+    }
+  }
+  return FALSE;
+}
+
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function show_title_preprocess_page(&$variables) {
+  $variables['show_title'] = FALSE;
+  if (!show_title_block()) {
+    $variables['show_title'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function show_title_theme_registry_alter(&$theme_registry) {
+  $module_path = drupal_get_path('module', 'show_title');
+  $theme_registry['node']['path'] = $module_path . '/templates';
+}
