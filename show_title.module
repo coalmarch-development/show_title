@@ -5,11 +5,13 @@
  * Module Show Title.
  */
 
+use Drupal\block\Entity\Block;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\taxonomy\Entity\Term;
-use \Drupal\Core\Access\AccessResult;
 
 /**
  * Implements hook_entity_extra_field_info().
@@ -75,11 +77,10 @@ function show_title_taxonomy_term_view(
   }
 }
 
-
 /**
  * Implements hook_block_access().
  */
-function show_title_block_access(\Drupal\block\Entity\Block $block, $operation, \Drupal\Core\Session\AccountInterface $account) {
+function show_title_block_access(Block $block, $operation, AccountInterface $account) {
   if ($operation == 'view' && $block->getPluginId() == 'page_title_block') {
     if (!show_title_block()) {
       return AccessResult::forbidden();
@@ -90,7 +91,8 @@ function show_title_block_access(\Drupal\block\Entity\Block $block, $operation, 
 /**
  * Define if the block title need to show.
  *
- * @return bool for show block.
+ * @return bool
+ *   For show block.
  */
 function show_title_block() {
   $show_block_title = TRUE;
@@ -106,12 +108,13 @@ function show_title_block() {
 /**
  * Check if the extra field is used.
  *
- * @return bool Is used.
+ * @return bool
+ *   Is used.
  */
 function show_title_is_in_display_mode() {
   $entities = [];
   foreach (\Drupal::routeMatch()->getParameters() as $param) {
-    if ($param instanceof \Drupal\Core\Entity\EntityInterface) {
+    if ($param instanceof EntityInterface) {
       $entities[] = $param;
     }
   }
@@ -129,7 +132,6 @@ function show_title_is_in_display_mode() {
   }
   return FALSE;
 }
-
 
 /**
  * Implements hook_preprocess_HOOK().
