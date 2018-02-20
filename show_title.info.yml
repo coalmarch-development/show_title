@@ -1,6 +1,6 @@
 name: Show Title
 type: module
-description: Create Title Extrafield to replace native Node Title.
+description: Create Extrafield Title to replace default Node Title.
 package: Fields
 core: 8.x
 dependencies:
