@@ -15,7 +15,7 @@ By using Show Title you will be able to create an Extrafield (pseudo-fields) of 
 
 https://www.drupal.org/project/show_title 
 
-To submit bug reports and feature suggestions, or to track changes: https://drupal.org/project/issues/show_title```
+To submit bug reports and feature suggestions, or to track changes: https://drupal.org/project/issues/show_title
 
 
 ### Supporting organization 
