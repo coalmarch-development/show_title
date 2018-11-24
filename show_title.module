@@ -12,7 +12,7 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\NodeType;
-use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
  * Implements hook_help().
@@ -54,8 +54,8 @@ function show_title_entity_extra_field_info() {
   }
 
   // Taxonomy terms.
-  foreach (Term::loadMultiple() as $term) {
-    $extra['taxonomy_term'][$term->bundle()]['display']['show_title'] = [
+  foreach (Vocabulary::loadMultiple() as $vocabulary) {
+    $extra['taxonomy_term'][$vocabulary->id()]['display']['show_title'] = [
       'label' => t('Name'),
       'description' => t('Show Name'),
       'weight' => 100,
